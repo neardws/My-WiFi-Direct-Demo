@@ -31,6 +31,16 @@
                 android:layout_height="wrap_content"
                 android:text="@string/get_file_button"
                 android:visibility="gone" />
+            <Button
+                android:id="@+id/send_ipaddr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Send_IP" />
+            <Button
+                android:id="@+id/btn_save_ip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save_IP"/>
         </LinearLayout>
         <TextView
             android:id="@+id/device_address"

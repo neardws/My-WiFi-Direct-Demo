@@ -90,16 +90,21 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                 manager.requestConnectionInfo(channel, fragment);
 
                 manager.requestGroupInfo(channel, new WifiP2pManager.GroupInfoListener() {
+
+
+
                     @Override
                     public void onGroupInfoAvailable(WifiP2pGroup group) {
-
                         /**
                          * deal with group question
                          */
 
 
-                    }
+
+
+                        }
                 });
+
             } else {
                 // It's a disconnect
                 activity.resetData();
