@@ -237,5 +237,10 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         }
 
     }
+
+    public void requestGroupInfo(WifiP2pManager.GroupInfoListener groupInfoListener){
+        manager.requestGroupInfo(channel,groupInfoListener);
+    }
+
 }
 

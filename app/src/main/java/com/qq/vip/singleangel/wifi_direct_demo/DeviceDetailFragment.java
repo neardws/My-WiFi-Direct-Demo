@@ -1,24 +1,33 @@
 package com.qq.vip.singleangel.wifi_direct_demo;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -39,13 +48,18 @@ import static android.content.ContentValues.TAG;
  * Created by singl on 2017/8/6.
  */
 
-public class DeviceDetailFragment extends Fragment implements ConnectionInfoListener {
+public class DeviceDetailFragment extends Fragment implements ConnectionInfoListener, WifiP2pManager.GroupInfoListener {
 
-    public static final String IP_SERVER = "192.168.49.1";
+   // public static final String IP_SERVER = "192.168.49.1";  //GroupOwner 默认Ip
     private static boolean server_running = false;
+
+    public int Server_Port = 8888;
+    public int Server_IP_Port = 7777;
+    public int Client_Port = 8989;
 
     public String deviceAddr;
     public String clientIp;
+    public List<String> clientIps = new ArrayList<String>();
 
     protected static final int CHOOSE_FILE_RESULT_CODE = 20;
     private View mContentView = null;
@@ -55,6 +69,17 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     ProgressDialog progressDialog = null;
 
 
+    String mNetworkName = "";
+    String mPassphrase = "";
+
+    public void setServer_running(boolean isRunning){
+        server_running = isRunning;
+    }
+
+    public List<String> getClientIps(){
+        return clientIps;
+    }
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -62,7 +87,16 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
+
+
+        /**
+         * init the SharedPreference
+         */
+        SharedPreferences sp = this.getActivity().getSharedPreferences("wifi_direct",Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putInt("Num",0);
+        editor.commit();
 
         mContentView = inflater.inflate(R.layout.device_detail, null);
         mContentView.findViewById(R.id.btn_connect).setOnClickListener(new View.OnClickListener() {
@@ -72,7 +106,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                 WifiP2pConfig config = new WifiP2pConfig();
                 config.deviceAddress = device.deviceAddress;
                 config.wps.setup = WpsInfo.PBC;
-                config.groupOwnerIntent = 0; //meaning that who 
+                //config.groupOwnerIntent = 0; //meaning that who
                 if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss();
                 }
@@ -119,7 +153,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                 Intent serviceIntent = new Intent(getActivity(), FileTransferService.class);
                 serviceIntent.setAction(FileTransferService.ACTION_SEND_IP);
                 serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, info.groupOwnerAddress.getHostAddress());
-                serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, 8888);
+                serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, Server_IP_Port);
                 getActivity().startService(serviceIntent);
             }
         });
@@ -129,6 +163,85 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             public void onClick(View v) {
                 TextView status = (TextView) mContentView.findViewById(R.id.status_text);
                 clientIp = status.getText().toString();
+                /**
+                if (!clientIp.equals("")){
+                    boolean isIn = false;
+                    for (String string : clientIps){
+                        if (clientIp.equals(string)){
+                            isIn = true;
+                        }
+                    }
+                    if (!isIn){
+                        clientIps.add(clientIp);
+                    }
+                }
+                 **/
+
+                SharedPreferences sp = mContentView.getContext().getSharedPreferences("wifi_direct",Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                int Num = sp.getInt("Num",0);
+                if (!clientIp.equals("")){
+                    boolean isIn = false;
+                    for (int i = 0; i < Num; i++){
+                        String item = sp.getString("item"+i,null);
+                        if (item != null && clientIp.equals(item)){
+                            isIn = true;
+                        }
+                    }
+                    if (!isIn){
+                        editor.putString("item"+Num,clientIp);
+                        editor.commit();
+                    }
+                }
+
+
+                File f = new File(Environment.getExternalStorageDirectory() + "/"
+                        + getActivity().getPackageName() + "/wificlientip-" + ".txt");
+                if (!f.exists()){
+                    try {
+                        f.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    try {
+                        OutputStream outputStream = new FileOutputStream(f);
+                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                        ClientList clientList = new ClientList();
+                        clientList.addClient(clientIp);
+                        objectOutputStream.writeObject(clientList);
+                        outputStream.close();
+
+                    }catch (FileNotFoundException e){
+
+                    }catch (IOException e){
+
+                    }
+
+                }else {     //file f exited
+                    try {
+                        InputStream inputStream = new FileInputStream(f);
+                        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+                        ClientList clientIP = (ClientList) objectInputStream.readObject();
+                        clientIP.addClient(clientIp);
+
+
+                        OutputStream outputStream = new FileOutputStream(f);
+                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                        ClientList clientList = new ClientList();
+                        clientList.addClient(clientIp);
+                        objectOutputStream.writeObject(clientList);
+                        outputStream.close();
+                        inputStream.close();
+
+                    } catch (IOException e) {
+
+                    } catch (ClassNotFoundException e) {
+
+                    }
+
+                }
+
             }
         });
 
@@ -174,7 +287,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
              }
 
              **/
-            serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, 8989);
+            serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, Client_Port);
             getActivity().startService(serviceIntent);
 
         }else {
@@ -209,8 +322,10 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
              }
              **/
 
-            serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, 8888);
+            serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, Server_Port);
             getActivity().startService(serviceIntent);
+
+
         }
 
     }
@@ -230,6 +345,10 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                 : getResources().getString(R.string.no)));
         if (info.isGroupOwner){
             isGroupowner = true;
+
+            WiFiDirectActivity activity = (WiFiDirectActivity) mContentView.getContext();
+            activity.requestGroupInfo(this);
+
         }
 
 
@@ -241,10 +360,11 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
         if (!server_running){
             if (isGroupowner){
-                new ServerIPAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text)).execute();
+                new ServerIPAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new ServerAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text),this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 server_running = true;
             }else {
-                new ClientAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text)).execute();
+                new ClientAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 server_running = true;
             }
         }
@@ -286,104 +406,34 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         this.getView().setVisibility(View.GONE);
     }
 
+
     /**
-     * A simple server socket that accepts connection and writes some data on
-     * the stream.
+     * Group Info
+     * @param group
      */
-    public static class ServerAsyncTask extends AsyncTask<Void, Void, String> {
+    @Override
+    public void onGroupInfoAvailable(WifiP2pGroup group) {
+        try {
+            Collection<WifiP2pDevice> devices = group.getClientList();
 
-        private final Context context;
-        private final TextView statusText;
-        private InetAddress inetAddress;
-
-        /**
-         * @param context
-         * @param statusText
-         */
-        public ServerAsyncTask(Context context, View statusText) {
-            this.context = context;
-            this.statusText = (TextView) statusText;
-
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            try {
-                ServerSocket serverSocket = new ServerSocket(8888);
-                Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
-                Socket client = serverSocket.accept();
-                Log.d(WiFiDirectActivity.TAG, "Server: connection done");
-                final File f = new File(Environment.getExternalStorageDirectory() + "/"
-                        + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis()
-                        + ".jpg");
-
-                File dirs = new File(f.getParent());
-                if (!dirs.exists())
-                    dirs.mkdirs();
-                f.createNewFile();
-
-                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
-                InputStream inputstream = client.getInputStream();
-                copyFile(inputstream, new FileOutputStream(f));
-
-                /**
-                ObjectInputStream objectInputStream = new ObjectInputStream(client.getInputStream());
-                Object object = objectInputStream.readObject();
-                if (object.getClass().equals(String.class) && ((String) object).equals("BROFIST")) {
-                    Log.d(TAG, "Client IP address: "+client.getInetAddress());
-                    inetAddress = client.getInetAddress();
-                }
-                 **/
-
-                serverSocket.close();
-                server_running = false;
-                return f.getAbsolutePath();
-            } catch (IOException e) {
-                Log.e(WiFiDirectActivity.TAG, e.getMessage());
-                return null;
+            int num = 0;
+            for (WifiP2pDevice peer : group.getClientList()){
+                num ++;
             }
-            /**catch (ClassNotFoundException e){
-                Log.e(WiFiDirectActivity.TAG, e.getMessage());
-                return null;
-            } **/
-        }
+            if (mNetworkName.equals(group.getNetworkName()) &&
+                    mPassphrase.equals(group.getPassphrase())){
 
-        /*
-         * (non-Javadoc)
-         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
-         */
-        @Override
-        protected void onPostExecute(String result) {
-            if (result != null) {
-          //      statusText.setText(inetAddress.getHostAddress());
-                Intent intent = new Intent();
-                intent.setAction(android.content.Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.parse("file://" + result), "image/*");
-                /**
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", new File(String.valueOf(Uri.parse("file://" + result))));
-                    intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
-                } else {
-                    intent.setDataAndType(Uri.parse("file://" + result), "application/vnd.android.package-archive");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                }
-                 **/
-                context.startActivity(intent);
+            }else {
+                mNetworkName = group.getNetworkName();
+                mPassphrase = group.getPassphrase();
+            //    startLocalService()
             }
-
+        }catch (Exception e){
+            Log.d(TAG,e.toString());
         }
-
-        /*
-         * (non-Javadoc)
-         * @see android.os.AsyncTask#onPreExecute()
-         */
-        @Override
-        protected void onPreExecute() {
-            statusText.setText("Opening a server socket");
-        }
-
     }
+
+
 
     public static class ServerIPAsyncTask extends AsyncTask<Void, Void, InetAddress> {
 
@@ -404,7 +454,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         @Override
         protected InetAddress doInBackground(Void... params) {
             try {
-                ServerSocket serverSocket = new ServerSocket(8888);
+                ServerSocket serverSocket = new ServerSocket(7777);
                 Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
                 Socket client = serverSocket.accept();
                 Log.d(WiFiDirectActivity.TAG, "Server: connection done");
@@ -508,16 +558,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                 Intent intent = new Intent();
                 intent.setAction(android.content.Intent.ACTION_VIEW);
                 intent.setDataAndType(Uri.parse("file://" + result), "image/*");
-                /**
-                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                 intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                 Uri contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileProvider", new File(String.valueOf(Uri.parse("file://" + result))));
-                 intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
-                 } else {
-                 intent.setDataAndType(Uri.parse("file://" + result), "application/vnd.android.package-archive");
-                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                 }
-                 **/
                 context.startActivity(intent);
             }
 

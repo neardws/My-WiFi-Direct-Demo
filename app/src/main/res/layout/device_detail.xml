@@ -35,12 +35,12 @@
                 android:id="@+id/send_ipaddr"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Send_IP" />
+                android:text="SendIP" />
             <Button
                 android:id="@+id/btn_save_ip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save_IP"/>
+                android:text="SaveIP"/>
         </LinearLayout>
         <TextView
             android:id="@+id/device_address"
