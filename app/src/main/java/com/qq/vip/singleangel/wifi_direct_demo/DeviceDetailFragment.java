@@ -19,7 +19,6 @@ import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.net.wifi.WpsInfo;
@@ -30,16 +29,15 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.qq.vip.singleangel.wifi_direct_demo.PopupWindows.DialogPopup;
 
 import static android.content.ContentValues.TAG;
 
@@ -59,6 +57,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
     public String deviceAddr;
     public String clientIp;
+    public String groupOwnerIp;
     public List<String> clientIps = new ArrayList<String>();
 
     protected static final int CHOOSE_FILE_RESULT_CODE = 20;
@@ -68,7 +67,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     private boolean isGroupowner = false;
     ProgressDialog progressDialog = null;
 
-
     String mNetworkName = "";
     String mPassphrase = "";
 
@@ -77,7 +75,50 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     }
 
     public List<String> getClientIps(){
-        return clientIps;
+        File f = new File(Environment.getExternalStorageDirectory() + "/"
+                + getActivity().getPackageName() + "/wificlientip-" + ".txt");
+        try {
+            InputStream inputStream = new FileInputStream(f);
+            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+            ClientList clientIP = (ClientList) objectInputStream.readObject();
+
+            return clientIP.getClientIps();
+
+        }catch (FileNotFoundException e){
+            return null;
+        }catch (IOException e){
+            return null;
+        }catch (ClassNotFoundException e){
+            return null;
+        }
+
+    }
+    public List<String> getRestClientIps(String clientIp){
+        File f = new File(Environment.getExternalStorageDirectory() + "/"
+                + getActivity().getPackageName() + "/wificlientip-" + ".txt");
+        try {
+            InputStream inputStream = new FileInputStream(f);
+            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+            ClientList clientIP = (ClientList) objectInputStream.readObject();
+            List<String> restClient = clientIP.getRestClient(clientIp);
+
+            return restClient;
+
+        }catch (FileNotFoundException e){
+            return null;
+        }catch (IOException e){
+            return null;
+        }catch (ClassNotFoundException e){
+            return null;
+        }
+    }
+
+    public boolean isGroupowner(){
+        return isGroupowner;
+    }
+
+    public String getGroupOwnerIp(){
+        return groupOwnerIp;
     }
 
 
@@ -141,9 +182,11 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     public void onClick(View v) {
                         // Allow user to pick an image from Gallery or other
                         // registered apps
-                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                        intent.setType("image/*");
-                        startActivityForResult(intent, CHOOSE_FILE_RESULT_CODE);
+                        DialogPopup dialogPopup = new DialogPopup(getActivity(),(DeviceDetailFragment)
+                                getActivity().getFragmentManager().findFragmentById(R.id.frag_detail));
+                        dialogPopup.showPopupWindow();
+
+
                     }
                 });
 
@@ -176,23 +219,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     }
                 }
                  **/
-
-                SharedPreferences sp = mContentView.getContext().getSharedPreferences("wifi_direct",Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                int Num = sp.getInt("Num",0);
-                if (!clientIp.equals("")){
-                    boolean isIn = false;
-                    for (int i = 0; i < Num; i++){
-                        String item = sp.getString("item"+i,null);
-                        if (item != null && clientIp.equals(item)){
-                            isIn = true;
-                        }
-                    }
-                    if (!isIn){
-                        editor.putString("item"+Num,clientIp);
-                        editor.commit();
-                    }
-                }
 
 
                 File f = new File(Environment.getExternalStorageDirectory() + "/"
@@ -247,6 +273,14 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
         return mContentView;
     }
+
+    public void sendPicture(){
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, CHOOSE_FILE_RESULT_CODE);
+    }
+
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -337,6 +371,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         }
         this.info = info;
         this.getView().setVisibility(View.VISIBLE);
+        groupOwnerIp = info.groupOwnerAddress.getHostAddress();
 
         // The owner IP is now known.
         TextView view = (TextView) mContentView.findViewById(R.id.group_owner);

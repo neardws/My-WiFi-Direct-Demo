@@ -110,13 +110,7 @@ public class ServerAsyncTask extends AsyncTask<Void, Void, String> {
             }
              **/
 
-            SharedPreferences sharedPreferences = context.getSharedPreferences("wifi_direct",Context.MODE_PRIVATE);
-            int Num = sharedPreferences.getInt("Num",0);
-            for (int i = 0; i < Num; i++){
-                if (!sharedPreferences.getString("item"+i,null).equals(clientIp)){
-                    clientIp = sharedPreferences.getString("item"+i,null);
-                }
-            }
+
 
             File f = new File(Environment.getExternalStorageDirectory() + "/"
                     + context.getPackageName() + "/wificlientip-" + ".txt");

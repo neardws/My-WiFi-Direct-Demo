@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#8f000000">
+
+    <RelativeLayout
+        android:id="@+id/popup_anima"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?colorPrimary"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textColor="?colorAccent"
+            android:text="@string/selete_a_way"
+            android:gravity="left|center_vertical"
+            android:textSize="18sp"
+            android:paddingLeft="15dp"
+            />
+        <View
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#3dd1a5"
+            android:layout_below="@id/title"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"/>
+        <ImageView
+            android:id="@+id/img_photo"
+            android:layout_marginStart="98dp"
+            android:src="@drawable/ic_photo_black_24dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_alignTop="@+id/img_video"
+            android:layout_alignStart="@+id/line2" />
+        <ImageView
+            android:id="@+id/img_video"
+            android:layout_below="@id/line"
+            android:layout_margin="5dp"
+            android:src="@drawable/ic_camera_alt_black_24dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_toEndOf="@+id/img_photo" />
+        <View
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_below="@id/img_photo"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@color/colorAccent"
+            android:layout_marginTop="15dp"/>
+
+    </RelativeLayout>
+</RelativeLayout>

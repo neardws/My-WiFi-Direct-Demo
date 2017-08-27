@@ -10,8 +10,6 @@ import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.util.Log;
 
-import static android.content.ContentValues.TAG;
-import static com.qq.vip.singleangel.wifi_direct_demo.BuildConfig.DEBUG;
 
 /**
  * Created by singl on 2017/8/6.
@@ -22,6 +20,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     private WifiP2pManager manager;
     private Channel channel;
     private WiFiDirectActivity activity;
+    private String action_Start_Server = "ACTION_START_SERVER";
 
     /**
      * @param manager WifiP2pManager system service

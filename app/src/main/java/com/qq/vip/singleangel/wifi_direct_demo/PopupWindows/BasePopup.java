@@ -1,0 +1,12 @@
+package com.qq.vip.singleangel.wifi_direct_demo.PopupWindows;
+
+import android.view.View;
+
+/**
+ * Created by singl on 2017/8/25.
+ */
+
+public interface BasePopup {
+    View onCreatePopupView();
+    View initAnimaView();
+}

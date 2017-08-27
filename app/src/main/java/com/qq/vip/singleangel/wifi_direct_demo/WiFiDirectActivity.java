@@ -1,8 +1,6 @@
 package com.qq.vip.singleangel.wifi_direct_demo;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -13,7 +11,6 @@ import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -21,6 +18,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import com.qq.vip.singleangel.wifi_direct_demo.PopupWindows.SlideFromBottomPopup;
+
 /**
  * Created by singl on 2017/8/6.
  */
@@ -31,6 +31,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     private WifiP2pManager manager;
     private boolean isWifiP2pEnabled = false;
     private boolean retryChannel = false;
+
 
     private final IntentFilter intentFilter = new IntentFilter();
     private Channel channel;
