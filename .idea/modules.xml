@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Wifi_direct_demo2.iml" filepath="$PROJECT_DIR$/Wifi_direct_demo2.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCVLibrary310/openCVLibrary310.iml" filepath="$PROJECT_DIR$/openCVLibrary310/openCVLibrary310.iml" />
     </modules>
   </component>
 </project>

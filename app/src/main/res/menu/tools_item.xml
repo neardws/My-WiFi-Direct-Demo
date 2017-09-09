@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/atn_video_start"
+        android:icon="@drawable/ic_videocam_black_24dp"
+        app:showAsAction="always" />
+    <item
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/atn_video_stop"
+        android:icon="@drawable/ic_videocam_off_black_24dp"
+        app:showAsAction="always" />
+
+</menu>

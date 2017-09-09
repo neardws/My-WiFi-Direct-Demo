@@ -43,47 +43,116 @@ public class ServerAsyncTask extends AsyncTask<Void, Void, String> {
         this.fragment = (DeviceDetailFragment) deviceDetailFragment;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see android.os.AsyncTask#onPreExecute()
+     */
+    @Override
+    protected void onPreExecute() {
+        statusText.setText("Opening a server socket");
+    }
+
     @Override
     protected String doInBackground(Void... params) {
+        ServerSocket serverSocket = null;
         try {
-            ServerSocket serverSocket = new ServerSocket(8888);
+            serverSocket = new ServerSocket(8888);
+            fragment.setServer_running(true);
             Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
-            Socket client = serverSocket.accept();
-            clientIp = client.getInetAddress().getHostAddress();
-            Log.d(WiFiDirectActivity.TAG, "Server: connection done");
-            final File f = new File(Environment.getExternalStorageDirectory() + "/"
-                    + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis()
-                    + ".jpg");
-
-            File dirs = new File(f.getParent());
-            if (!dirs.exists())
-                dirs.mkdirs();
-            f.createNewFile();
-
-            Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
-            InputStream inputstream = client.getInputStream();
-            MyFile.copyFile(inputstream, new FileOutputStream(f));
-
-            /**
-             ObjectInputStream objectInputStream = new ObjectInputStream(client.getInputStream());
-             Object object = objectInputStream.readObject();
-             if (object.getClass().equals(String.class) && ((String) object).equals("BROFIST")) {
-             Log.d(TAG, "Client IP address: "+client.getInetAddress());
-             inetAddress = client.getInetAddress();
-             }
-             **/
-
-            serverSocket.close();
-            fragment.setServer_running(false);
-            return f.getAbsolutePath();
-        } catch (IOException e) {
-            Log.e(WiFiDirectActivity.TAG, e.getMessage());
-            return null;
+        }catch (IOException e){
+            Log.d(WiFiDirectActivity.TAG,"Open serversocket in port:8888 failed");
         }
-        /**catch (ClassNotFoundException e){
-         Log.e(WiFiDirectActivity.TAG, e.getMessage());
-         return null;
-         } **/
+        while (true){
+            try {
+                Socket client = serverSocket.accept();
+                clientIp = client.getInetAddress().getHostAddress();
+                Log.d(WiFiDirectActivity.TAG, "Server: connection done");
+                final File f = new File(Environment.getExternalStorageDirectory() + "/"
+                        + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis()
+                        + ".jpg");
+
+                File dirs = new File(f.getParent());
+                if (!dirs.exists())
+                    dirs.mkdirs();
+                f.createNewFile();
+
+                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
+                InputStream inputstream = client.getInputStream();
+                MyFile.copyFile(inputstream, new FileOutputStream(f));
+
+               // serverSocket.close();
+
+
+                String result = f.getAbsolutePath();
+
+                if (result != null) {
+                    //      statusText.setText(inetAddress.getHostAddress());
+
+                    ClientList clientList = MyFile.getClient();
+                    /**
+                    List<String> restClient = clientList.getRestClient(clientIp);
+
+                    if (restClient == null){
+                        //do nothing
+                    }else {
+                        for (String clientAddr : restClient){
+                            Intent serviceIntent = new Intent(context, FileTransferService.class);
+                            serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
+                            serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, Uri.parse("file://" + result).toString());
+                            serviceIntent.putExtra("isGroupOwner",true);
+                            serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientAddr);
+                            serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, 8989);
+                            context.startService(serviceIntent);
+                        }
+                    }
+
+
+
+                    /**
+
+                    File file = new File(Environment.getExternalStorageDirectory() + "/"
+                            + "com.qq.singleangel.wifi_direct_demo" + "/wificlientip-" + ".txt");
+                    try {
+                        InputStream inputStream = new FileInputStream(file);
+                        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+                        ClientList clientIP = (ClientList) objectInputStream.readObject();
+                        List<String> restClient = clientIP.getRestClient(clientIp);
+
+                        for (String clientAddr : restClient){
+                            Intent serviceIntent = new Intent(context, FileTransferService.class);
+                            serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
+                            serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, Uri.parse("file://" + result).toString());
+                            serviceIntent.putExtra("isGroupOwner",true);
+                            serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientAddr);
+                            serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, 8989);
+                            context.startService(serviceIntent);
+                        }
+
+                    }catch (FileNotFoundException e){
+
+                    }catch (IOException e){
+
+                    }catch (ClassNotFoundException e){
+
+                    }
+
+                     **/
+
+                    Intent intent = new Intent();
+                    intent.setAction(android.content.Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.parse("file://" + result), "image/*");
+
+                    context.startActivity(intent);
+                }
+
+
+                //return f.getAbsolutePath();
+            } catch (IOException e) {
+                Log.e(WiFiDirectActivity.TAG, e.getMessage());
+                return null;
+            }
+        }
+
     }
 
     /*
@@ -95,25 +164,8 @@ public class ServerAsyncTask extends AsyncTask<Void, Void, String> {
         if (result != null) {
             //      statusText.setText(inetAddress.getHostAddress());
 
-            /**
-            Intent serviceIntent = new Intent(context, FileTransferService.class);
-            serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-            serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, Uri.parse("file://" + result).toString());
-            serviceIntent.putExtra("isGroupOwner",true);
-
-            /**
-            List<String> clientIps = fragment.getClientIps();
-            for (String string : clientIps){
-                if (!string.equals(clientIp)){
-                    clientIp = string;
-                }
-            }
-             **/
-
-
-
             File f = new File(Environment.getExternalStorageDirectory() + "/"
-                    + context.getPackageName() + "/wificlientip-" + ".txt");
+                    + "com.qq.singleangel.wifi_direct_demo" + "/wificlientip-" + ".txt");
             try {
                 InputStream inputStream = new FileInputStream(f);
                 ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
@@ -171,13 +223,6 @@ public class ServerAsyncTask extends AsyncTask<Void, Void, String> {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see android.os.AsyncTask#onPreExecute()
-     */
-    @Override
-    protected void onPreExecute() {
-        statusText.setText("Opening a server socket");
-    }
+
 
 }

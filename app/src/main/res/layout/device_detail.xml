@@ -41,7 +41,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="SaveIP"/>
+
         </LinearLayout>
+        <Button
+            android:id="@+id/btn_start_ser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start"/>
+
+        <Button
+            android:id="@+id/btn_show_client_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Show"/>
         <TextView
             android:id="@+id/device_address"
             android:layout_width="match_parent"

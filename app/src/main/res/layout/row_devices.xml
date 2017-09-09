@@ -5,12 +5,15 @@
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:background="?android:attr/activatedBackgroundIndicator"
     android:padding="6dip">
+
     <ImageView
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:layout_marginRight="2dip"
+        android:layout_weight="0.10"
         android:src="@drawable/ic_android_black_24dp" />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="0dip"
@@ -30,4 +33,22 @@
             android:singleLine="true"
             android:ellipsize="marquee" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/img_disconnect"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_marginLeft="2dip"
+        android:layout_weight="0.10"
+        android:src="@drawable/ic_close_black_24dp"
+        android:visibility="invisible"/>
+
+    <ImageView
+        android:id="@+id/img_send"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_marginLeft="2dip"
+        android:layout_weight="0.10"
+        android:src="@drawable/ic_send_black_24dp"
+        android:visibility="invisible"/>
 </LinearLayout>

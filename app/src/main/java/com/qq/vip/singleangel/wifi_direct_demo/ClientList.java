@@ -50,4 +50,16 @@ public class ClientList implements Serializable {
     public List<String> getClientIps(){
         return clientIps;
     }
+
+    public String toString(){
+        String string = "";
+        if (clientIps.size() == 0){
+            return string;
+        }else {
+            for (String s : clientIps){
+                string = string + "  " + s;
+            }
+            return string;
+        }
+    }
 }

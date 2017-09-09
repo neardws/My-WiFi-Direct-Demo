@@ -3,8 +3,28 @@
     >
     <item
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/atn_direct_discover"
+        android:id="@+id/atn_start"
         android:icon="@drawable/ic_search_black_24dp"
-        android:title="@string/discover_peers_button"
-        app:showAsAction="ifRoom|withText" />
+        android:title="Step.1"
+        app:showAsAction="always" />
+    <item
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/atn_start2"
+        android:icon="@drawable/ic_connect_black_24dp"
+        android:title="Step.2"
+        app:showAsAction="always" />
+    <item
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/atn_start3"
+        android:icon="@drawable/ic_send_black_24dp"
+        android:title="Step.3"
+        app:showAsAction="always" />
+
+    <item
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/atn_video"
+        android:icon="@drawable/ic_videocam_black_24dp"
+        android:title="Camera"
+        app:showAsAction="always" />
+
 </menu>

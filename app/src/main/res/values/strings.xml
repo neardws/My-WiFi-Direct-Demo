@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Wifi_direct_demo</string>
+    <string name="app_name">Sight视界</string>
     <string name="enable_p2p_button">P2P On/Off</string>
     <string name="discover_peers_button">Discover</string>
     <string name="connect_peer_button">Connect</string>
@@ -22,5 +22,6 @@
     <string name="confirm_delete">你确定要删除此联系人吗？</string>
     <string name="ok">确定</string>
     <string name="cancel">取消</string>
+    <string name="title_activity_camera">CameraActivity</string>
 
 </resources>

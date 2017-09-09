@@ -17,7 +17,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+
+
+
+
 }
+
+
+/**
+repositories {
+    maven {
+        url 'https://raw.github.com/vRallev/mvn-repo/master/'
+    }
+}**/
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -26,5 +39,10 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
+  //  compile 'org.opencv:opencv-android:2.4.8'
+
     testCompile 'junit:junit:4.12'
+    compile project(path: ':openCVLibrary310')
 }
+

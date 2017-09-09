@@ -1,9 +1,7 @@
 package com.qq.vip.singleangel.wifi_direct_demo.PopupWindows;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
-import android.media.Image;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -11,12 +9,12 @@ import android.view.animation.CycleInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 
-import com.qq.vip.singleangel.wifi_direct_demo.CameraCaptureAndCommunication.CameraCaptureActivity;
-import com.qq.vip.singleangel.wifi_direct_demo.CameraCaptureAndCommunication.CameraPreview;
+import com.qq.vip.singleangel.wifi_direct_demo.CameraCapture.CameraActivity;
 import com.qq.vip.singleangel.wifi_direct_demo.DeviceDetailFragment;
+import com.qq.vip.singleangel.wifi_direct_demo.FileTransferService;
 import com.qq.vip.singleangel.wifi_direct_demo.R;
 
-import java.util.List;
+import java.net.InetAddress;
 
 /**
  * Created by singl on 2017/8/25.
@@ -28,10 +26,13 @@ public class DialogPopup extends BasePopupWindow{
     private ImageView img_photo;
     private ImageView img_video;
     private String action_Start_Server = "ACTION_START_SERVER";
+    private InetAddress inetAddress;
 
 
     public DialogPopup(final Activity context, final DeviceDetailFragment deviceDetailFragment) {
         super(context);
+
+        inetAddress = deviceDetailFragment.getGroupOwnerInet();
         img_photo = (ImageView) findViewById(R.id.img_photo);
         img_video = (ImageView) findViewById(R.id.img_video);
 
@@ -54,8 +55,20 @@ public class DialogPopup extends BasePopupWindow{
 
                     } **/
                 }else {
-                    Intent intent = new Intent(getContext(), CameraCaptureActivity.class);
+                    /**
+                    Intent serverIntent = new Intent(getContext(), FileTransferService.class);
+                    serverIntent.setAction(FileTransferService.ACTION_START_RECEIVE_VIDEO);
+                    serverIntent.putExtra(FileTransferService.EXTRAS_ADDRESS,"192.168.49.1");
+                    serverIntent.putExtra(FileTransferService.EXTRAS_PORT,9999);
+                    context.startService(serverIntent);
+                     **/
+
+                    Intent intent = new Intent(getContext(), CameraActivity.class);
+
                     context.startActivity(intent);
+
+
+
                 }
             }
         });
