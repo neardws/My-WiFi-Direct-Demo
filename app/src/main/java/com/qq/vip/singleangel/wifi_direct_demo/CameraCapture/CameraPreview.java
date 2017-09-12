@@ -19,6 +19,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Size;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -27,6 +28,8 @@ import android.view.SurfaceView;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+
+import com.qq.vip.singleangel.wifi_direct_demo.CameraCaptureAndCommunication.CameraHelper;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,6 +56,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private Uri outputMediaFileUri;
     private String outputMediaFileType;
     private MediaRecorder mMediaRecorder;
+
+    private boolean isRecording = false;
 
     private float oldDist = 1f;
 
@@ -252,9 +257,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 @Override
                 protected Void doInBackground(Void... params) {
                     mMediaRecorder.start();
+                    isRecording = true;
                     return null;
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }.execute();
             return true;
         }else {
             releaseMediaRecorder();
@@ -265,6 +271,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void stopRecording(final ImageView view){
         if (mMediaRecorder != null){
             mMediaRecorder.stop();
+            releaseMediaRecorder();
+            releaseCamera();
             Bitmap thumbnail= ThumbnailUtils.createVideoThumbnail(outputMediaFileUri.getPath(), MediaStore.Video.Thumbnails.MINI_KIND);
             view.setImageBitmap(thumbnail);
         }
@@ -272,7 +280,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public boolean isRecording(){
-        return mMediaRecorder != null;
+        return isRecording;
     }
 
     private boolean prepareVideoRecorder(){
@@ -282,20 +290,30 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         int rotation = getDisplayOrientation();
         mMediaRecorder.setOrientationHint(rotation);
 
+        Camera.Parameters parameters = mCamera.getParameters();
+        List<Camera.Size> mSupportedPreviewSizes = parameters.getSupportedPreviewSizes();
+        List<Camera.Size> mSupportedVideoSizes = parameters.getSupportedVideoSizes();
+        Camera.Size optimalSize = CameraHelper.getOptimalVideoSize(mSupportedVideoSizes,
+                mSupportedPreviewSizes, CameraPreview.this.getWidth(), CameraPreview.this.getHeight());
+
+        // Use the same size for recording profile.
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        profile.videoFrameWidth = optimalSize.width;
+        profile.videoFrameHeight = optimalSize.height;
+
+        // likewise for the camera object itself.
+        parameters.setPreviewSize(profile.videoFrameWidth, profile.videoFrameHeight);
+        mCamera.setParameters(parameters);
+
         mCamera.unlock();
         mMediaRecorder.setCamera(mCamera);
 
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
-        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));
+        mMediaRecorder.setProfile(profile);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String prefVideoSize = prefs.getString("video_size","");
-        String[] split = prefVideoSize.split("x");
-        mMediaRecorder.setVideoSize(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
-
-        mMediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
+        mMediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).getPath());
 
         mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
 
@@ -322,6 +340,15 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             mCamera.lock();
         }
     }
+
+    private void releaseCamera(){
+        if (mCamera != null){
+            // release the camera for other applications
+            mCamera.release();
+            mCamera = null;
+        }
+    }
+
 
     public int getDisplayOrientation() {
         Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
@@ -511,6 +538,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
 
+        Camera.Size size = camera.getParameters().getPreviewSize();
 
         switch (processType){
             case PROCESS_WITH_HANDLER_THREAD:
@@ -528,7 +556,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
              //   new ProcessWithAsyncTask().execte(data);
                 break;
             case PROCESS_WITH_THREAD_POOL:
-                processWithThreadPool.post(data);
+                processWithThreadPool.post(data,size);
                 break;
         }
 

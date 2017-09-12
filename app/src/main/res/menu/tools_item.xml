@@ -4,11 +4,13 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/atn_video_start"
         android:icon="@drawable/ic_videocam_black_24dp"
-        app:showAsAction="always" />
+        android:title="Start"
+        app:showAsAction="withText|ifRoom" />
     <item
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/atn_video_stop"
         android:icon="@drawable/ic_videocam_off_black_24dp"
-        app:showAsAction="always" />
+        android:title="Stop"
+        app:showAsAction="withText|ifRoom" />
 
 </menu>

@@ -110,12 +110,14 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         super.onResume();
         receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
         registerReceiver(receiver, intentFilter);
+       // MyFile.ClearFile();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         unregisterReceiver(receiver);
+     //   MyFile.ClearFile();
     }
 
     /**
@@ -139,6 +141,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.action_item, menu);
+
         return true;
     }
 
@@ -376,6 +379,8 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
                 WifiP2pConfig config = computeIntent(listFragment.getPeers()); //notice that only discovery success ,the peers is exits
                 if (config != null){
                     WiFiDirectActivity.this.connect(config);
+                }else {
+                    Toast.makeText(WiFiDirectActivity.this, "Peers List is null.",Toast.LENGTH_LONG).show();
                 }
             }
             return null;
@@ -392,8 +397,8 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
 
         private WifiP2pConfig computeIntent(List<WifiP2pDevice> peers){
             WifiP2pConfig mP2pConfig = new WifiP2pConfig();
-            if (peers.size() == 0){
-                Log.d(TAG, "the device is no peers");
+            if (peers == null){
+                Toast.makeText(WiFiDirectActivity.this, "Peers is void.Please discover peers.", Toast.LENGTH_LONG);
                 return null;
             }else if (peers.size() == 1){
                 mP2pConfig.deviceAddress = peers.get(0).deviceAddress;

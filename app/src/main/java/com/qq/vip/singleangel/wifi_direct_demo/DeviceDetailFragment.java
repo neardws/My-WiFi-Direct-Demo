@@ -316,9 +316,9 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             @Override
             public void onClick(View v) {
                 TextView view = (TextView) mContentView.findViewById(R.id.group_owner);
-                //ClientList clientList = (ClientList) MyFile.getClient();
-                //view.append(clientList.toString());
-                view.setText(getActivity().getPackageName());
+                ClientList clientList = (ClientList) MyFile.getClient();
+                view.setText(clientList.toString());
+               // view.setText(getActivity().getPackageName());
             }
         });
 
@@ -337,20 +337,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (isGroupowner){  //sender is server\
-
-          /**  String localIP = Utils.getLocalIPAddress();
-            // Trick to find the ip in the file /proc/net/arp
-            String client_mac_fixed = null;
-            String clientIP = null;
-
-            TextView view = (TextView) mContentView.findViewById(R.id.device_address);
-            String deviceAddress = view.getText().toString();
-
-            client_mac_fixed = deviceAddress.replace("99", "19");
-            clientIP = Utils.getIPFromMac(client_mac_fixed);
-
-           **/
-
 
             // User has picked an image. Transfer it to group owner i.e peer using
             // FileTransferService.
@@ -373,52 +359,14 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     serviceIntent.putExtra("isGroupOwner",true);
                     //serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIp);
                     serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, client);
-                    /**
-                     if(localIP != null && localIP.equals(IP_SERVER)){
-                     serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
-                     }else{
-                     serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
-                     }
 
-                     **/
                     serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, Client_Port);
                     getActivity().startService(serviceIntent);
                 }
             }
 
-            /**
-            Uri uri = data.getData();
-            TextView statusText = (TextView) mContentView.findViewById(R.id.status_text);
-            statusText.setText("Sending: " + uri);
-            Log.d(WiFiDirectActivity.TAG, "Intent----------- " + uri);
-            Intent serviceIntent = new Intent(getActivity(), FileTransferService.class);
-            serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-            serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, uri.toString());
-            serviceIntent.putExtra("isGroupOwner",true);
-            //serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIp);
-            serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, "");
-            /**
-             if(localIP != null && localIP.equals(IP_SERVER)){
-             serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
-             }else{
-             serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
-             }
-
-
-            serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, Client_Port);
-            getActivity().startService(serviceIntent);**/
 
         }else {
-            /**
-            String localIP = Utils.getLocalIPAddress();
-            // Trick to find the ip in the file /proc/net/arp
-            String client_mac_fixed = null;
-            String clientIP = null;
-            if (device != null){
-                client_mac_fixed = device.deviceAddress.replace("99", "19");
-                clientIP = Utils.getIPFromMac(client_mac_fixed);
-            }
-             **/
 
             // User has picked an image. Transfer it to group owner i.e peer using
             // FileTransferService.
@@ -432,13 +380,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, uri.toString());
 
             serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, info.groupOwnerAddress.getHostAddress());
-            /**
-             if(localIP != null && localIP.equals(IP_SERVER)){
-             serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, clientIP);
-             }else{
-             serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, IP_SERVER);
-             }
-             **/
 
             serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, Server_Port);
             getActivity().startService(serviceIntent);
@@ -454,7 +395,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             progressDialog.dismiss();
         }
         this.info = info;
-    //    this.getView().setVisibility(View.VISIBLE);
+  //      this.getView().setVisibility(View.VISIBLE);
         groupOwnerIp = info.groupOwnerAddress.getHostAddress();
         groupOwnerInet = info.groupOwnerAddress;
 
@@ -484,8 +425,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             if (isGroupowner){
                 new ServerIPAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 new ServerAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text),this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                new ServerStartReceiveAsyncTask(getActivity(),mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
+           //     new ServerStartReceiveAsyncTask(getActivity(),mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new ServerVideoTask(getActivity(),mContentView.findViewById(R.id.status_text),this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 server_running = true;
             }else {
                 //发送IP地址给GroupOwner
@@ -496,7 +437,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                 serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, Server_IP_Port);
                 getActivity().startService(serviceIntent);
                  **/
-
+                new ClientVideoTask(getActivity(), mContentView.findViewById(R.id.status_text), this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 new ClientAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 server_running = true;
 

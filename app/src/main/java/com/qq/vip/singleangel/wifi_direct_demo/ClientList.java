@@ -2,6 +2,7 @@ package com.qq.vip.singleangel.wifi_direct_demo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -28,6 +29,10 @@ public class ClientList implements Serializable {
         }
     }
 
+    public int size(){
+        return clientIps.size();
+    }
+
     public boolean isIn(String value){
         for (String string : clientIps){
             if (string.equals(value)){
@@ -52,7 +57,7 @@ public class ClientList implements Serializable {
     }
 
     public String toString(){
-        String string = "";
+        String string = "size is zero";
         if (clientIps.size() == 0){
             return string;
         }else {

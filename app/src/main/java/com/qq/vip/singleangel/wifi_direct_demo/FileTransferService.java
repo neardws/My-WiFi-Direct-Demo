@@ -188,7 +188,6 @@ public class FileTransferService extends IntentService {
             }
              **/
 
-
         }else if (intent.getAction().equals(ACTION_SEND_IP)){
             /**
             try {
@@ -258,6 +257,7 @@ public class FileTransferService extends IntentService {
                 }
             }
         }else if (intent.getAction().equals(ACTION_SEND_VIDEO)){
+            /**
             String host = intent.getExtras().getString(EXTRAS_ADDRESS);
             int port = intent.getExtras().getInt(EXTRAS_PORT);
             byte[] parm = intent.getByteArrayExtra(EXTRAS_VIDEO);
@@ -271,6 +271,48 @@ public class FileTransferService extends IntentService {
             }catch (IOException e){
 
             }finally {
+                if (socket != null) {
+                    if (socket.isConnected()) {
+                        try {
+                            socket.close();
+                        } catch (IOException e) {
+                            // Give up
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }**/
+
+            String fileUri = intent.getExtras().getString(EXTRAS_FILE_PATH);
+            String host = intent.getExtras().getString(EXTRAS_ADDRESS);
+            int port = intent.getExtras().getInt(EXTRAS_PORT);
+            boolean isGroupOwner = intent.getExtras().getBoolean("isGroupOwner");
+            Socket socket = new Socket();
+            try {
+                Log.d(WiFiDirectActivity.TAG, "Opening client socket - ");
+                socket.bind(null);
+                socket.connect((new InetSocketAddress(host, port)), SOCKET_TIMEOUT);
+
+                Log.d(WiFiDirectActivity.TAG, "Client socket - " + socket.isConnected());
+                OutputStream stream = socket.getOutputStream();
+                ContentResolver cr = context.getContentResolver();
+                InputStream is = null;
+                try {
+                    is = cr.openInputStream(Uri.parse(fileUri));
+                } catch (FileNotFoundException e) {
+                    Log.d(WiFiDirectActivity.TAG, e.toString());
+                }
+                DeviceDetailFragment.copyFile(is, stream);
+
+
+                // ObjectOutputStream oos = new ObjectOutputStream(stream);
+                //oos.writeObject(new String("BROFIST"));
+
+
+                Log.d(WiFiDirectActivity.TAG, "Client: Data written");
+            } catch (IOException e) {
+                Log.e(WiFiDirectActivity.TAG, e.getMessage());
+            } finally {
                 if (socket != null) {
                     if (socket.isConnected()) {
                         try {

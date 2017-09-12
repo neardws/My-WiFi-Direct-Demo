@@ -6,8 +6,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.util.Log;
+import android.util.Size;
 
 import com.qq.vip.singleangel.wifi_direct_demo.DeviceDetailFragment;
 import com.qq.vip.singleangel.wifi_direct_demo.WiFiDirectActivity;
@@ -36,8 +38,6 @@ public class ProcessWithThreadPool {
     private BlockingQueue<Runnable> workQueue;
     private ThreadPoolExecutor mThreadPool;
 
-    private int w = 1080;
-    private int h = 1920;
 
     public ProcessWithThreadPool() {
         int corePoolSize = Runtime.getRuntime().availableProcessors();
@@ -46,20 +46,23 @@ public class ProcessWithThreadPool {
         mThreadPool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, KEEP_ALIVE_TIME, TIME_UNIT, workQueue);
     }
 
-    public synchronized void post(final byte[] frameData) {
+    public synchronized void post(final byte[] frameData, final Camera.Size size) {
         mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
-                processFrame(frameData);
+                processFrame(frameData,size);
             }
         });
     }
 
-    private void processFrame(byte[] frameData) {
+    private void processFrame(byte[] frameData, Camera.Size size) {
         Log.i(TAG, "test");
         String host = "192.168.49.1";
         int port = 23333;
         int SOCKET_TIMEOUT = 5000;
+
+        int w = size.width;
+        int h = size.height;
 
         Socket socket = new Socket();
         try {
@@ -73,7 +76,7 @@ public class ProcessWithThreadPool {
            //     return null;
             }
             byte[] tmp = os.toByteArray();
-            Bitmap bmp = BitmapFactory.decodeByteArray(tmp, 0,tmp.length);
+            Bitmap bmp = BitmapFactory.decodeByteArray(tmp, 0,os.size());
 
             Log.d(WiFiDirectActivity.TAG, "Client socket - " + socket.isConnected());
             OutputStream stream = socket.getOutputStream();

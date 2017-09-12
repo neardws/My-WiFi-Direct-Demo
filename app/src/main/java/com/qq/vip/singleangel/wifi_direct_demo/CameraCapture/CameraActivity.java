@@ -23,6 +23,10 @@ public class CameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
+        cameraPreview = new CameraPreview(this);
+        frameLayout = (FrameLayout) findViewById(R.id.camera_pre);
+        frameLayout.addView(cameraPreview);
+
         final ImageView mediaPreview  = (ImageView)findViewById(R.id.media_preview);
         final Button buttonCapturePhoto = (Button) findViewById(R.id.button_capture_picture);
         buttonCapturePhoto.setOnClickListener(new View.OnClickListener() {
@@ -105,10 +109,13 @@ public class CameraActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.atn_video_start:
-                startPreview();
+                //startPreview();
+                cameraPreview.startRecording();
                 return true;
             case R.id.atn_video_stop:
-                stopPreview();
+                //stopPreview();
+                final ImageView mediaPreview  = (ImageView)findViewById(R.id.media_preview);
+                cameraPreview.stopRecording(mediaPreview);
                 return true;
         }
         return false;

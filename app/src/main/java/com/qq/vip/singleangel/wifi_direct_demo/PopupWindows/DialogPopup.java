@@ -10,6 +10,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 
 import com.qq.vip.singleangel.wifi_direct_demo.CameraCapture.CameraActivity;
+import com.qq.vip.singleangel.wifi_direct_demo.CameraCapture.VideoActivity;
 import com.qq.vip.singleangel.wifi_direct_demo.DeviceDetailFragment;
 import com.qq.vip.singleangel.wifi_direct_demo.FileTransferService;
 import com.qq.vip.singleangel.wifi_direct_demo.R;
@@ -27,6 +28,7 @@ public class DialogPopup extends BasePopupWindow{
     private ImageView img_video;
     private String action_Start_Server = "ACTION_START_SERVER";
     private InetAddress inetAddress;
+    public static final String isGroupOwner = "IS_GROUP_OWNER";
 
 
     public DialogPopup(final Activity context, final DeviceDetailFragment deviceDetailFragment) {
@@ -54,6 +56,9 @@ public class DialogPopup extends BasePopupWindow{
                         context.startActivity(intent);
 
                     } **/
+                    Intent intent = new Intent(getContext(), VideoActivity.class);
+                    intent.putExtra(DialogPopup.isGroupOwner, true);
+                    context.startActivity(intent);
                 }else {
                     /**
                     Intent serverIntent = new Intent(getContext(), FileTransferService.class);
@@ -63,8 +68,8 @@ public class DialogPopup extends BasePopupWindow{
                     context.startService(serverIntent);
                      **/
 
-                    Intent intent = new Intent(getContext(), CameraActivity.class);
-
+                    Intent intent = new Intent(getContext(), VideoActivity.class);
+                    intent.putExtra(DialogPopup.isGroupOwner, false);
                     context.startActivity(intent);
 
 

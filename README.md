@@ -15,3 +15,8 @@ Second: Send message through it
 2、Add a native lib openCV2 support
 Next Plan:
 Ues the openCV2 to handle the frame captured by camera
+
+2017.9.12
+deal with video capture and transport ,however it is not real time
+Next Plan:
+Fix how to do it in real time use LocalSocket and MediaRecorder

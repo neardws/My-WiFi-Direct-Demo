@@ -14,7 +14,7 @@
             class="com.qq.vip.singleangel.wifi_direct_demo.DeviceListFragment"
             android:id="@+id/frag_list"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/phone_list_height">
+            android:layout_height="wrap_content">
             <!-- Preview: layout=@layout/row_devices -->
         </fragment>
         <fragment

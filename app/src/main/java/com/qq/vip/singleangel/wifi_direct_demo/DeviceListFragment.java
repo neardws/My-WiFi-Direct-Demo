@@ -89,11 +89,13 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     public void onListItemClick(ListView l, View v, int position, long id) {
         WifiP2pDevice device = (WifiP2pDevice) getListAdapter().getItem(position);
       //  ((DeviceActionListener) getActivity()).showDetails(device);
-        Intent serviceIntent = new Intent(getActivity(), FileTransferService.class);
-        serviceIntent.setAction(FileTransferService.ACTION_SEND_IP);
-        serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, "192.168.49.1");
-        serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, 7777);
-        getActivity().startService(serviceIntent);
+        if (!device.isGroupOwner()){
+            Intent serviceIntent = new Intent(getActivity(), FileTransferService.class);
+            serviceIntent.setAction(FileTransferService.ACTION_SEND_IP);
+            serviceIntent.putExtra(FileTransferService.EXTRAS_ADDRESS, "192.168.49.1");
+            serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, 7777);
+            getActivity().startService(serviceIntent);
+        }
     }
 
     /**

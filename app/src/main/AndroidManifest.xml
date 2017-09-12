@@ -54,6 +54,7 @@
 
         </activity>
         <activity android:name=".CameraCapture.AcceptVideoActivity"></activity>
+        <activity android:name=".CameraCapture.VideoActivity"></activity>
         <!-- Used for transferring files  after a successful connection -->
         <service
             android:name=".FileTransferService"
