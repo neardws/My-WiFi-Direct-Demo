@@ -20,3 +20,8 @@ Ues the openCV2 to handle the frame captured by camera
 deal with video capture and transport ,however it is not real time
 Next Plan:
 Fix how to do it in real time use LocalSocket and MediaRecorder
+
+2017.9.14
+Fix video transport
+Next Plan:
+How to create a ad-hoc network through some information communicate before connect
