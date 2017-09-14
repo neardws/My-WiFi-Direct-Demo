@@ -45,13 +45,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CameraCaptureAndCommunication.CameraCaptureActivity"></activity>
-        <activity android:name=".CameraCaptureAndCommunication.ReciveVideoActivity"></activity>
-        <activity android:name=".CameraCapture.CameraActivity">
-
-        </activity>
+        <activity android:name=".CameraCapture.CameraActivity"></activity>
         <activity android:name=".CameraCapture.ShowPhotoVideo">
-
         </activity>
         <activity android:name=".CameraCapture.AcceptVideoActivity"></activity>
         <activity android:name=".CameraCapture.VideoActivity"></activity>

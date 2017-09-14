@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
+import com.qq.vip.singleangel.wifi_direct_demo.CameraCapture.AcceptVideoActivity;
 import com.qq.vip.singleangel.wifi_direct_demo.CameraCapture.CameraActivity;
 import com.qq.vip.singleangel.wifi_direct_demo.PopupWindows.DialogPopup;
 
@@ -169,7 +170,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
                 dialogPopup.showPopupWindow();
                 return true;
             case R.id.atn_video:
-                Intent intent = new Intent(WiFiDirectActivity.this, CameraActivity.class);
+                Intent intent = new Intent(WiFiDirectActivity.this, AcceptVideoActivity.class);
                 WiFiDirectActivity.this.startActivity(intent);
                 return true;
             default:

@@ -10,9 +10,12 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 
 import com.qq.vip.singleangel.wifi_direct_demo.CameraCapture.CameraActivity;
+import com.qq.vip.singleangel.wifi_direct_demo.CameraCapture.CameraPreview;
 import com.qq.vip.singleangel.wifi_direct_demo.CameraCapture.VideoActivity;
+import com.qq.vip.singleangel.wifi_direct_demo.ClientList;
 import com.qq.vip.singleangel.wifi_direct_demo.DeviceDetailFragment;
 import com.qq.vip.singleangel.wifi_direct_demo.FileTransferService;
+import com.qq.vip.singleangel.wifi_direct_demo.MyFile;
 import com.qq.vip.singleangel.wifi_direct_demo.R;
 
 import java.net.InetAddress;
@@ -47,6 +50,27 @@ public class DialogPopup extends BasePopupWindow{
         img_video.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
+                /**
+                if (deviceDetailFragment.isGroupowner()){
+                    ClientList clientList = MyFile.getClient();
+                    for (String s : clientList.getClientIps()){
+                        Intent intent = new Intent(getContext(), FileTransferService.class);
+                        intent.setAction(FileTransferService.ACTION_START_RECEIVE_VIDEO);
+                        intent.putExtra(FileTransferService.EXTRAS_ADDRESS, s);
+                        intent.putExtra(FileTransferService.EXTRAS_PORT,9999);
+                        context.startService(intent);
+                    }
+                }else {
+                    Intent intent = new Intent(getContext(), FileTransferService.class);
+                    intent.setAction(FileTransferService.ACTION_START_RECEIVE_VIDEO);
+                    intent.putExtra(FileTransferService.EXTRAS_ADDRESS, "192.168.49.1");
+                    intent.putExtra(FileTransferService.EXTRAS_PORT,9999);
+                    context.startService(intent);
+                }
+                 **/
+
                 if (deviceDetailFragment.isGroupowner()){
                     /**
                     List<String> clientIp = deviceDetailFragment.getClientIps();
@@ -56,19 +80,19 @@ public class DialogPopup extends BasePopupWindow{
                         context.startActivity(intent);
 
                     } **/
-                    Intent intent = new Intent(getContext(), VideoActivity.class);
+                    Intent intent = new Intent(getContext(), CameraActivity.class);
                     intent.putExtra(DialogPopup.isGroupOwner, true);
                     context.startActivity(intent);
                 }else {
-                    /**
+
                     Intent serverIntent = new Intent(getContext(), FileTransferService.class);
                     serverIntent.setAction(FileTransferService.ACTION_START_RECEIVE_VIDEO);
                     serverIntent.putExtra(FileTransferService.EXTRAS_ADDRESS,"192.168.49.1");
-                    serverIntent.putExtra(FileTransferService.EXTRAS_PORT,9999);
+                    serverIntent.putExtra(FileTransferService.EXTRAS_PORT,22645);
                     context.startService(serverIntent);
-                     **/
 
-                    Intent intent = new Intent(getContext(), VideoActivity.class);
+
+                    Intent intent = new Intent(getContext(), CameraActivity.class);
                     intent.putExtra(DialogPopup.isGroupOwner, false);
                     context.startActivity(intent);
 

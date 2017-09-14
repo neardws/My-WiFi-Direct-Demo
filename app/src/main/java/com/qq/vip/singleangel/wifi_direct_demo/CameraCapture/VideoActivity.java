@@ -7,6 +7,10 @@ import android.graphics.RectF;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.net.Credentials;
+import android.net.LocalServerSocket;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +37,8 @@ import com.qq.vip.singleangel.wifi_direct_demo.R;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +59,14 @@ public class VideoActivity extends AppCompatActivity {
     private static final String TAG = "Recorder";
 
     private boolean isGroupOwner;
+
+    private static final String SOCKET_NAME = "H264";
+    private static final int BUFFER_SIZE = 500000;
+    private LocalSocket client;
+    private LocalSocket server;
+    private LocalServerSocket lss;
+
+    private boolean running;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -339,7 +353,7 @@ public class VideoActivity extends AppCompatActivity {
                 mSupportedPreviewSizes, mPreview.getWidth(), mPreview.getHeight());
 
         // Use the same size for recording profile.
-        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
         profile.videoFrameWidth = optimalSize.width;
         profile.videoFrameHeight = optimalSize.height;
 
@@ -376,7 +390,10 @@ public class VideoActivity extends AppCompatActivity {
         if (mOutputFile == null) {
             return false;
         }
-        mMediaRecorder.setOutputFile(mOutputFile.getPath());
+
+        initSocket();
+       // mMediaRecorder.setOutputFile(mOutputFile.getPath());
+        mMediaRecorder.setOutputFile(client.getFileDescriptor());
         // END_INCLUDE (configure_media_recorder)
 
         // Step 5: Prepare configured MediaRecorder
@@ -424,6 +441,78 @@ public class VideoActivity extends AppCompatActivity {
             }
             // inform the user that recording has started
         }
+    }
+
+    /**
+     * 对LocalSocket进行初始化
+     */
+    private void initSocket(){
+        try {
+            client = new LocalSocket();
+            lss = new LocalServerSocket(SOCKET_NAME);
+
+            client.connect(new LocalSocketAddress(SOCKET_NAME));
+            client.setSendBufferSize(BUFFER_SIZE);
+
+            server = lss.accept();
+            Credentials cre = server.getPeerCredentials();
+            Log.d(TAG, String.valueOf(cre.getUid()));
+            server.setReceiveBufferSize(BUFFER_SIZE);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void startServer(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                InputStream is;
+                int i = 0;
+                try {
+                    is = server.getInputStream();
+                    byte[] data;
+                    while (true){
+                        data = new byte[1024];
+                        is.read(data);
+
+                        i++;
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    public void clientSend(){
+        if(running) return;
+        running = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                OutputStream os;
+                int i = 0;
+                try {
+                    os = client.getOutputStream();
+                    byte[] data;
+                    int len;
+                    while(running){
+                        byte[] writeBytes = ("LocalSocket" + i).getBytes();
+                        os.write(writeBytes);
+                        os.flush();
+                        i++;
+                        Thread.sleep(1000);
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    public void stopClient(){
+        running = false;
     }
 
 }

@@ -4,8 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -29,8 +31,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.qq.vip.singleangel.wifi_direct_demo.CameraCaptureAndCommunication.CameraHelper;
+import com.qq.vip.singleangel.wifi_direct_demo.ClientList;
+import com.qq.vip.singleangel.wifi_direct_demo.MyFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -61,45 +65,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     private float oldDist = 1f;
 
-    //process frame type
-    private static final int PROCESS_WITH_HANDLER_THREAD = 1;
-    private static final int PROCESS_WITH_QUEUE = 2;
-    private static final int PROCESS_WITH_ASYNC_TASK = 3;
-    private static final int PROCESS_WITH_THREAD_POOL = 4;
+    private TransferThread transferthread;
+    private boolean isGroupOwner;
 
-    private int processType = PROCESS_WITH_THREAD_POOL;
 
-    //Handler Thread
-    private ProcessWithHandlerThread processFrameHandlerThread;
-    private Handler processFrameHandler;
-
-    //Queue
-    private ProcessWithQueue processWithQueue;
-    private LinkedBlockingQueue<byte[]> frameQueue;
-
-    //ThreadPool
-    private ProcessWithThreadPool processWithThreadPool;
-
-    public CameraPreview(Context context){
+    public CameraPreview(Context context, boolean isGroupOwner){
         super(context);
         mHolder = getHolder();
         mHolder.addCallback(this);
+        this.isGroupOwner = isGroupOwner;
 
-        switch (processType){
-            case PROCESS_WITH_HANDLER_THREAD:
-                processFrameHandlerThread = new ProcessWithHandlerThread("process frame");
-                processFrameHandler = new Handler(processFrameHandlerThread.getLooper(), processFrameHandlerThread);
-                break;
-            case PROCESS_WITH_QUEUE:
-                frameQueue = new LinkedBlockingQueue<>();
-                processWithQueue = new ProcessWithQueue(frameQueue);
-                break;
-            case PROCESS_WITH_ASYNC_TASK:
-                break;
-            case PROCESS_WITH_THREAD_POOL:
-                processWithThreadPool = new ProcessWithThreadPool();
-                break;
-        }
 
 
     }
@@ -126,6 +101,15 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         mCamera = getCameraInstance();
+        /**
+        // Use the same size for recording profile.
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
+
+        Camera.Parameters parameters = mCamera.getParameters();
+        // likewise for the camera object itself.
+        parameters.setPreviewSize(profile.videoFrameWidth, profile.videoFrameHeight);
+        mCamera.setParameters(parameters);
+         **/
         mCamera.setPreviewCallback(this);
         try {
             mCamera.setPreviewDisplay(holder);
@@ -539,25 +523,27 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void onPreviewFrame(byte[] data, Camera camera) {
 
         Camera.Size size = camera.getParameters().getPreviewSize();
-
-        switch (processType){
-            case PROCESS_WITH_HANDLER_THREAD:
-                processFrameHandler.obtainMessage(ProcessWithHandlerThread.WHAT_PROCESS_FRAME,
-                        data).sendToTarget();
-                break;
-            case PROCESS_WITH_QUEUE:
-                try {
-                    frameQueue.put(data);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        YuvImage image = new YuvImage(data, ImageFormat.NV21, size.width,
+                size.height, null);
+        if (image != null) {
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+            image.compressToJpeg(new Rect(0, 0, size.width, size.height),
+                    80, outStream);
+            try {
+                outStream.flush();
+                if (isGroupOwner){
+                    ClientList clientList = MyFile.getClient();
+                    for (String s : clientList.getClientIps()){
+                        transferthread = new TransferThread(outStream, s);
+                        transferthread.start();
+                    }
+                }else {
+                    transferthread = new TransferThread(outStream, "192.168.49.1");
+                    transferthread.start();
                 }
-                break;
-            case PROCESS_WITH_ASYNC_TASK:
-             //   new ProcessWithAsyncTask().execte(data);
-                break;
-            case PROCESS_WITH_THREAD_POOL:
-                processWithThreadPool.post(data,size);
-                break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }

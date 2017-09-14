@@ -38,8 +38,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.qq.vip.singleangel.wifi_direct_demo.CameraCapture.AcceptVideoActivity;
-import com.qq.vip.singleangel.wifi_direct_demo.CameraCaptureAndCommunication.CameraCaptureActivity;
-import com.qq.vip.singleangel.wifi_direct_demo.CameraCaptureAndCommunication.ReciveVideoActivity;
 import com.qq.vip.singleangel.wifi_direct_demo.PopupWindows.DialogPopup;
 
 import static android.content.ContentValues.TAG;
@@ -425,8 +423,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             if (isGroupowner){
                 new ServerIPAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 new ServerAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text),this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-           //     new ServerStartReceiveAsyncTask(getActivity(),mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                new ServerVideoTask(getActivity(),mContentView.findViewById(R.id.status_text),this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new ServerStartReceiveAsyncTask(getActivity(),mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+              //  new ServerVideoTask(getActivity(),mContentView.findViewById(R.id.status_text),this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 server_running = true;
             }else {
                 //发送IP地址给GroupOwner
@@ -437,6 +435,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                 serviceIntent.putExtra(FileTransferService.EXTRAS_PORT, Server_IP_Port);
                 getActivity().startService(serviceIntent);
                  **/
+                new ServerStartReceiveAsyncTask(getActivity(),mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 new ClientVideoTask(getActivity(), mContentView.findViewById(R.id.status_text), this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 new ClientAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 server_running = true;
@@ -713,7 +712,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         protected Void doInBackground(Void... params) {
             ServerSocket serverSocket = null;
             try {
-                serverSocket = new ServerSocket(9999);
+                serverSocket = new ServerSocket(22645);
                 Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
             }catch (IOException e){
                 Log.d(WiFiDirectActivity.TAG, "Failed to open serversocket in port 9999: ServerStartReceiveAsyncTask");
@@ -733,8 +732,12 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                         Log.d(TAG, "Client IP address: "+client.getInetAddress());
                         inetAddress = client.getInetAddress();
                     }
-                    serverSocket.close();
-                    server_running = false;
+
+                    Intent intent = new Intent(context, AcceptVideoActivity.class);
+                    context.startActivity(intent);
+                    //serverSocket.close();
+                    //server_running = false;
+
 
                 } catch (IOException e) {
                     Log.e(WiFiDirectActivity.TAG, e.getMessage());

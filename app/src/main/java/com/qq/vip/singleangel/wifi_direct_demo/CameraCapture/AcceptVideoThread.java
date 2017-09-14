@@ -55,7 +55,7 @@ public class AcceptVideoThread extends Thread {
                 Bitmap bmp = (Bitmap) objectInputStream.readObject();
 
                 AcceptVideoActivity activity = (AcceptVideoActivity) context;
-                activity.drawPicture(bmp);
+              //  activity.drawPicture(bmp);
 
                // ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 //MyFile.copyFile(inputStream,byteArrayOutputStream);

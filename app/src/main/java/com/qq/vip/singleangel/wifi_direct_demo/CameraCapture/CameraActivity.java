@@ -11,19 +11,27 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.qq.vip.singleangel.wifi_direct_demo.ClientList;
+import com.qq.vip.singleangel.wifi_direct_demo.FileTransferService;
+import com.qq.vip.singleangel.wifi_direct_demo.MyFile;
 import com.qq.vip.singleangel.wifi_direct_demo.R;
 
 public class CameraActivity extends AppCompatActivity {
 
     private CameraPreview cameraPreview;
     private FrameLayout frameLayout;
+    public static final String ISGroupOwner = "IS_GROUP_OWNER";
+    private boolean isGroupOwner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        cameraPreview = new CameraPreview(this);
+        Intent intent = getIntent();
+        isGroupOwner = intent.getExtras().getBoolean(ISGroupOwner);
+
+        cameraPreview = new CameraPreview(this, isGroupOwner);
         frameLayout = (FrameLayout) findViewById(R.id.camera_pre);
         frameLayout.addView(cameraPreview);
 
@@ -64,7 +72,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     public void startPreview() {
-        cameraPreview = new CameraPreview(this);
+        cameraPreview = new CameraPreview(this,isGroupOwner);
         frameLayout = (FrameLayout) findViewById(R.id.camera_pre);
         frameLayout.addView(cameraPreview);
 
@@ -109,13 +117,14 @@ public class CameraActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.atn_video_start:
-                //startPreview();
-                cameraPreview.startRecording();
+
+                startPreview();
+               // cameraPreview.startRecording();
                 return true;
             case R.id.atn_video_stop:
-                //stopPreview();
-                final ImageView mediaPreview  = (ImageView)findViewById(R.id.media_preview);
-                cameraPreview.stopRecording(mediaPreview);
+                stopPreview();
+                //final ImageView mediaPreview  = (ImageView)findViewById(R.id.media_preview);
+                //cameraPreview.stopRecording(mediaPreview);
                 return true;
         }
         return false;
